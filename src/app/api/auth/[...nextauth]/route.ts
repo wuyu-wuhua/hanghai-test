@@ -40,41 +40,53 @@ const authOptions: AuthOptions = {
     },
     async jwt({ token, user, account }) {
       if (user && user.email && account) {
-        const dbUser: User = {
-          uuid: genUniSeq(),
-          email: user.email,
-          nickname: user.name || "",
-          avatar_url: user.image || "",
-          signin_type: account.type,
-          signin_provider: account.provider,
-          signin_openid: account.providerAccountId,
-          created_at: getIsoTimestr(),
-          signin_ip: "",
-        };
-        await saveUser(dbUser);
-        const creditUsage = await getCreditUsageByUserId(dbUser.uuid);
-        if (!creditUsage) {
-          await createCreditUsage({
-            user_id: dbUser.uuid,
-            user_subscriptions_id: -1,
-            is_subscription_active: false,
-            used_count: 0,
-            // 赠送的积分数
-            period_remain_count: 6,
-            period_start: new Date(),
-            period_end: new Date(
-              new Date().setMonth(new Date().getMonth() + 1)
-            ),
-            created_at: new Date(),
-          });
+        try {
+          const dbUser: User = {
+            uuid: genUniSeq(),
+            email: user.email,
+            nickname: user.name || "",
+            avatar_url: user.image || "",
+            signin_type: account.type,
+            signin_provider: account.provider,
+            signin_openid: account.providerAccountId,
+            created_at: getIsoTimestr(),
+            signin_ip: "",
+          };
+          await saveUser(dbUser);
+          const creditUsage = await getCreditUsageByUserId(dbUser.uuid);
+          if (!creditUsage) {
+            await createCreditUsage({
+              user_id: dbUser.uuid,
+              user_subscriptions_id: -1,
+              is_subscription_active: false,
+              used_count: 0,
+              // 赠送的积分数
+              period_remain_count: 6,
+              period_start: new Date(),
+              period_end: new Date(
+                new Date().setMonth(new Date().getMonth() + 1)
+              ),
+              created_at: new Date(),
+            });
+          }
+          token.user = {
+            uuid: dbUser.uuid,
+            nickname: dbUser.nickname,
+            email: dbUser.email,
+            avatar_url: dbUser.avatar_url,
+            created_at: dbUser.created_at,
+          };
+        } catch (error) {
+          console.error("Database error during auth:", error);
+          // 即使数据库失败也允许登录
+          token.user = {
+            uuid: genUniSeq(),
+            nickname: user.name || "",
+            email: user.email,
+            avatar_url: user.image || "",
+            created_at: getIsoTimestr(),
+          };
         }
-        token.user = {
-          uuid: dbUser.uuid,
-          nickname: dbUser.nickname,
-          email: dbUser.email,
-          avatar_url: dbUser.avatar_url,
-          created_at: dbUser.created_at,
-        };
       }
       return token;
     },
