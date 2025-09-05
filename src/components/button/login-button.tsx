@@ -9,7 +9,10 @@ export default function () {
   return (
     <Button
       className="capitalize text-black rounded-full"
-      onClick={() => signIn("google")}
+      onClick={() => {
+        console.log("Login button clicked");
+        signIn("google").catch(err => console.error("SignIn error:", err));
+      }}
     >
       {t("login")}
     </Button>
