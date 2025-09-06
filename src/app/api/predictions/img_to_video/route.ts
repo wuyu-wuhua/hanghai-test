@@ -86,7 +86,8 @@ export async function POST(request: Request) {
   return NextResponse.json(prediction, { status: 201 });
   } catch (error) {
     console.error("API Error:", error);
-    return NextResponse.json({ error: "Internal server error", details: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: "Internal server error", details: errorMessage }, { status: 500 });
   }
 }
 
