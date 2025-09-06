@@ -13,11 +13,11 @@ const replicate = new Replicate({
 const WEBHOOK_HOST = process.env.REPLICATE_URL
 
 export async function POST(request: Request) {
-  if (!process.env.REPLICATE_API_TOKEN) {
-    throw new Error(
-      "The REPLICATE_API_TOKEN environment variable is not set. See README.md for instructions on how to set it."
-    );
-  }
+  try {
+    if (!process.env.REPLICATE_API_TOKEN) {
+      console.error("REPLICATE_API_TOKEN not set");
+      return NextResponse.json({ error: "REPLICATE_API_TOKEN not configured" }, { status: 500 });
+    }
   const formData = await request.formData();
   const prompt = formData.get("prompt") as string;
   const user_id = formData.get("user_id") as string;
@@ -84,6 +84,10 @@ export async function POST(request: Request) {
   });
 
   return NextResponse.json(prediction, { status: 201 });
+  } catch (error) {
+    console.error("API Error:", error);
+    return NextResponse.json({ error: "Internal server error", details: error.message }, { status: 500 });
+  }
 }
 
 
