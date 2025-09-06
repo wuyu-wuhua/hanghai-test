@@ -55,7 +55,7 @@ export default function Pricing() {
         user_email: user?.email,
       };
 
-      const response = await fetch("/api/checkout", {
+      const response = await fetch(`${window.location.origin}/api/checkout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
