@@ -46,6 +46,7 @@ export default function Pricing() {
   ) => {
     try {
       setLoading(true);
+      console.log("Checkout attempt:", { plan_id, amount, interval, user: user?.uuid });
 
       const params = {
         plan_id: plan_id,
